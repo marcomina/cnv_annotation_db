@@ -31,6 +31,8 @@ infile_colnames = gsub('#', '', offset %>% data.frame %>% unlist)
 names(infile_colnames) = NULL
 print(infile_colnames)
 
+INFO_subfields = c("DBVARID", "CHR2", "EVENT", "SVTYPE", "EXPERIMENT", "SAMPLE", "SAMPLESET", "AC", "AF", "AN", "LINKS", "DESC", "SEQ", "END", "REGIONID", "ALT_class", "CLNSIG", "clinical_source", "PHENO", "ORIGIN", "CLNACC", "SVLEN", "CIPOS", "CIEND", "VALIDATED", "SOMATIC")
+
 ############
 # Data to ignore
 fields_to_mask = c("DBVARID", "CHR2", "EVENT", "REF", "QUAL", "FILTER", "SVTYPE", "EXPERIMENT", "SAMPLE", "SAMPLESET", "AC", "AF", "AN", "LINKS", "DESC", "SEQ")
@@ -74,19 +76,32 @@ schemas = list('dbvar_vcf_cnv_roi' = cnv_roi_table_schema, 'dbvar_vcf_cnv_call' 
 
 
 
+
 ##############################
 # Functions
 ##############################
 
-split_info <- function(data) {
+split_info <- function(data, only.known=FALSE) {
 	INFOs = strsplit(data %>% pull(INFO), ';', fixed=TRUE)
 	# Split infos
+	default = c('no_info' = TRUE)
+	if(only.known) {
+		fields_to_retain = INFO_subfields
+		default = rep(NA, length(fields_to_retain))
+		names(default) = fields_to_retain
+	}
+
 	INFOs = lapply(INFOs, function(x) {
-		if(length(grep('=', x, fixed=TRUE))==0) return(c('no_info' = TRUE))
+		if(length(grep('=', x, fixed=TRUE))==0) return(default)
 		x = x[(grep('=', x, fixed=TRUE))]
 		x = strsplit(x, '=', fixed=TRUE)
 		values = sapply(x, function(x) x[[2]])
 		names(values) = sapply(x, function(x) x[[1]])
+
+		if(only.known) {
+			values = values[fields_to_retain]
+			names(values) = fields_to_retain
+		}
 		return(values)
 	})
 	return(INFOs)
@@ -94,7 +109,7 @@ split_info <- function(data) {
 
 # This function converts the input cvf data into the consistnt format ready to be injected into the database.
 # The implementation is awufully inefficient as it was developed for exploring the data and is flexible upon changes in the number, order and type of fields of the input data. Can be sped up by replacing the data.frame and rbind.fill coversions with an exact declaration of the fields to be retained. Nevertheless, it takes around 100 minutes to process the entire dbvar dataset with this version.
-interpret_info <- function(df) {
+interpret_info <- function(df, speedup=TRUE) {
 	# annotate the call with its precision
 	df = df %>% mutate(imprecise = grepl('IMPRECISE', INFO, fixed=TRUE))
 	df = df %>% mutate(ALT = gsub('<|>', '', ALT))
@@ -105,16 +120,24 @@ interpret_info <- function(df) {
 	df = df %>% mutate(ALT_class = ifelse(grepl('CNV', ALT, fixed=TRUE), 'duplication', ALT_class))
 	df = df %>% mutate(ALT_class = ifelse(grepl('DEL', ALT, fixed=TRUE), 'deletion', ALT_class))
 	df = df %>% mutate(ALT_class = ifelse(grepl('INS', ALT, fixed=TRUE), 'insertion', ALT_class))
+
 	# process INFOs
-	dfi = split_info(df)
+	if(!speedup) {
+		dfi = split_info(df)
+		# Convert to consistent dataframe
+		dfi = lapply(dfi, function(x) data.frame(t(x), stringsAsFactors=FALSE))
+		dfi2 = plyr::rbind.fill(dfi)
+	} else {
+		dfi = split_info(df, only.known=TRUE)
+		# Convert to consistent dataframe
+		dfi = do.call(rbind, dfi)
+		dfi2 = data.frame(dfi, stringsAsFactors=FALSE)
+	}
 	df$INFO = NULL
-	# Convert to consistent dataframe
-	dfi = lapply(dfi, function(x) data.frame(t(x), stringsAsFactors=FALSE))
-	dfi2 = plyr::rbind.fill(dfi)
 
 	# merge back INFO and othr fields
 	if(nrow(dfi2) != nrow(df)) stop('Error in interpret_info!')
-	df = cbind(df, dfi2)
+	df = cbind(df, dfi2 %>% select(setdiff(colnames(dfi2), colnames(df))))
 	# convert some fields into INTegers
 	# df = df %>% mutate(CHROM = as.character(CHROM)) # should not be necessary
 	df = df %>% mutate(POS = as.numeric(POS))

@@ -13,7 +13,7 @@ library(tidyr)
 # Possible Enhancement: use argparse to parse parameters from the command line. Overkilling for now
 db = "output/dbvar_v2.sqlite"
 CHUNK_SIZE = 200000
-src_fname = 'processing/temp_GRCh38.2019_11_03.variant_call.vcf'
+src_fname = 'processing/temp_GRCh38.variant_call.vcf'
 src_h = src_fname
 
 

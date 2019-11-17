@@ -53,7 +53,8 @@ print('TP53 Example')
 chr = '17'; start = 7668402; stop = 7687550
 print("chr = '17'; start = 7668402; stop = 7687550")
 print('')
-res = cnv_match(conn, chr, start, stop, strategy = 'partial', top = 10, max_dist = 10000)
+res = cnv_match(conn, chr, start, stop, strategy = 'partial', top = NULL, max_dist = NULL)
+dim(res)
 res %>% head(20)
 
 

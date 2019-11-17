@@ -1,3 +1,5 @@
+######
+# Create and activate a conda environment
 conda create -n dbvar1
 conda activate dbvar1
 

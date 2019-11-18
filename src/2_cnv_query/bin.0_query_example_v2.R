@@ -56,6 +56,7 @@ print('')
 res = cnv_match(conn, chr, start, stop, strategy = 'partial', top = NULL, max_dist = NULL)
 dim(res)
 res %>% head(20)
+write.table(res, file='example_TP53_cnvs.tsv', sep="\t", quote=FALSE, row.names=FALSE, col.names = TRUE)
 
 
 dbDisconnect(conn)

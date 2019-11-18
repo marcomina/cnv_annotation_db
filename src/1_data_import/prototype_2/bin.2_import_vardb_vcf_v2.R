@@ -122,12 +122,12 @@ interpret_info <- function(df, speedup=TRUE) {
 	df = df %>% mutate(ALT_class = ifelse(grepl('INS', ALT, fixed=TRUE), 'insertion', ALT_class))
 
 	# process INFOs
-	if(!speedup) {
+	if(!speedup) { # Fast version. Only retains subfields we know a-priori will be inserted in the database. Way faster (~3x faster) than the other version
 		dfi = split_info(df)
 		# Convert to consistent dataframe
 		dfi = lapply(dfi, function(x) data.frame(t(x), stringsAsFactors=FALSE))
 		dfi2 = plyr::rbind.fill(dfi)
-	} else {
+	} else { # Versatile version. Retains all subfields at cost of time complexity. Good for exploring data
 		dfi = split_info(df, only.known=TRUE)
 		# Convert to consistent dataframe
 		dfi = do.call(rbind, dfi)

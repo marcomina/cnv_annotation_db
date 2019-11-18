@@ -5,7 +5,7 @@ library(RSQLite)
 # library(tidyr)
 
 gen_exact_matching_query <- function(chr, start, stop) {
-	# only retrieves cnvs overlapping exactly with the query range
+	# Function to retrieve cnvs overlapping EXACTLY with the query range
 	# query = paste(
 	# 	'select * FROM', dbvar_main_roi_table, ',', dbvar_main_call_table,
 	# 	'WHERE',
@@ -34,7 +34,7 @@ gen_exact_matching_query <- function(chr, start, stop) {
 }
 
 gen_overlapping_matching_query <- function(chr, start, stop) {
-	# only retrieves cnvs overlapping partially with the query range
+	# Function that retrieves cnvs overlapping PARTIALLY with the query range
 
 	# version 1. No join
 	# query = paste(

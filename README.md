@@ -14,7 +14,7 @@ The code in this repository implements an annotation system for CNV data, with a
 
 	bash src/bin.0_gen_env_v1.sh
 
-3. Generate the database (requires aroound 50 minutes):
+3. Generate the database (takes around 50 minutes):
 
 	bash src/1_data_import/prototype_2/script.2_import_vardb_vcf_v1.sh
 

@@ -12,7 +12,7 @@ The code in this repository implements an annotation system for CNV data, with a
 	
 2. (Optional) Create, activate and populate a new conda environment. You can use the script src/0_setup_env/bin.0_gen_env_v1.sh:
 
-	bash src/0_setup_env/bin.0_gen_env_v1.sh
+	bash src/bin.0_gen_env_v1.sh
 
 3. Generate the database (requires aroound 50 minutes):
 

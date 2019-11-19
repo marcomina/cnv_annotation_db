@@ -8,7 +8,7 @@ The code in this repository implements an annotation system for CNV data, with a
 
 	git clone https://github.com/marcomina/cnv_annotation_db.git
 	
-	cd cnv_annotaion_db 
+	cd cnv_annotation_db 
 	
 2. (Optional) Create, activate and populate a new conda environment. You can use the script src/0_setup_env/bin.0_gen_env_v1.sh:
 
